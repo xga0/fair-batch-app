@@ -207,4 +207,4 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
         outputs=[batch_output, count_output, n_input, k_input, start_input]
     )
 
-demo.launch()
+demo.launch(server_name="0.0.0.0", share=False)
