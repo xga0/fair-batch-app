@@ -171,7 +171,10 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
     def save_counts():
         data = dict(appearance_counts)
         json_str = json.dumps(data, indent=2)
-        return str(json_str)
+        return {
+            "name": "appearance_counts.json",
+            "data": json_str.encode('utf-8')
+        }
 
     def save_full():
         data = {
@@ -180,18 +183,22 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
             "k": session_config["k"],
             "start": session_config["start"]
         }
-        return str(json.dumps(data, indent=2))
+        json_str = json.dumps(data, indent=2)
+        return {
+            "name": "full_progress.json",
+            "data": json_str.encode('utf-8')
+        }
 
     save_counts_btn.click(
         fn=save_counts,
         inputs=[],
-        outputs=gr.File(label="Download", value="appearance_counts.json", visible=True)
+        outputs=gr.File(label="Download", file_count="single", visible=True)
     )
 
     save_full_btn.click(
         fn=save_full,
         inputs=[],
-        outputs=gr.File(label="Download", value="full_progress.json", visible=True)
+        outputs=gr.File(label="Download", file_count="single", visible=True)
     )
 
     load_counts_file.upload(
