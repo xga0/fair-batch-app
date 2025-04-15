@@ -8,10 +8,15 @@ appearance_counts = defaultdict(int)
 session_config = {"N": 10, "k": 3, "start": 1}
 
 # === Core Batch Logic ===
+def format_counts_for_table(counts_dict):
+    if not counts_dict:
+        return []
+    return [[k, v] for k, v in sorted(counts_dict.items())]
+
 def generate_fair_batch(N, k=3, start=1):
     session_config.update({"N": N, "k": k, "start": start})
     if k > N:
-        return f"❌ Batch size {k} cannot exceed N={N}.", {}
+        return f"❌ Batch size {k} cannot exceed N={N}.", []
 
     full_range = list(range(start, start + N))
     full_range_set = set(full_range)
@@ -41,20 +46,20 @@ def generate_fair_batch(N, k=3, start=1):
         appearance_counts[num] += 1
 
     batch_str = ", ".join(str(n) for n in batch)
-    return (warning + "\n\n" if warning else "") + batch_str, dict(sorted(appearance_counts.items()))
+    return (warning + "\n\n" if warning else "") + batch_str, format_counts_for_table(appearance_counts)
 
 # === Reset, Clean, Save, Load ===
 def reset_progress():
     appearance_counts.clear()
     session_config.update({"N": 10, "k": 3, "start": 1})
-    return "", {}, 10, 3, 1
+    return "", [], 10, 3, 1
 
 def clean_counts_to_current_range():
     valid_range = set(range(session_config["start"], session_config["start"] + session_config["N"]))
     to_delete = [k for k in appearance_counts if k not in valid_range]
     for k in to_delete:
         del appearance_counts[k]
-    return "✅ Out-of-range counts removed.", dict(sorted(appearance_counts.items()))
+    return "✅ Out-of-range counts removed.", format_counts_for_table(appearance_counts)
 
 def save_counts_only():
     return json.dumps(dict(appearance_counts), indent=2)
@@ -76,7 +81,7 @@ def load_counts_only(file):
     else:
         warning = "✅ Appearance counts loaded successfully."
 
-    return warning, dict(sorted(appearance_counts.items()))
+    return warning, format_counts_for_table(appearance_counts)
 
 def save_full_progress():
     return json.dumps({
@@ -95,7 +100,7 @@ def load_full_progress(file):
         "k": contents["k"],
         "start": contents["start"]
     })
-    return "✅ Full progress restored.", dict(sorted(appearance_counts.items())), contents["N"], contents["k"], contents["start"]
+    return "✅ Full progress restored.", format_counts_for_table(appearance_counts), contents["N"], contents["k"], contents["start"]
 
 # === Gradio UI ===
 with gr.Blocks() as demo:
