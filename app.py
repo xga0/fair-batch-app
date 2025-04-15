@@ -168,16 +168,10 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
     )
 
     # Save functions
-    def create_json_file(data, filename):
-        json_str = json.dumps(data, indent=2)
-        return {
-            "name": filename,
-            "data": json_str.encode('utf-8')
-        }
-
     def save_counts():
         data = dict(appearance_counts)
-        return create_json_file(data, "appearance_counts.json")
+        json_str = json.dumps(data, indent=2)
+        return gr.File.update(value=json_str.encode('utf-8'), visible=True, filename="appearance_counts.json")
 
     def save_full():
         data = {
@@ -186,18 +180,19 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
             "k": session_config["k"],
             "start": session_config["start"]
         }
-        return create_json_file(data, "full_progress.json")
+        json_str = json.dumps(data, indent=2)
+        return gr.File.update(value=json_str.encode('utf-8'), visible=True, filename="full_progress.json")
 
     save_counts_btn.click(
         fn=save_counts,
         inputs=[],
-        outputs=gr.File()
+        outputs=gr.File(visible=False)
     )
 
     save_full_btn.click(
         fn=save_full,
         inputs=[],
-        outputs=gr.File()
+        outputs=gr.File(visible=False)
     )
 
     load_counts_file.upload(
