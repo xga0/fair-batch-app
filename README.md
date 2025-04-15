@@ -2,8 +2,6 @@
 
 An interactive [Gradio](https://gradio.app/) web app for generating **fair batches of integers** from a configurable range. This app ensures balanced usage over time, useful for sampling, experimentation, and fairness-based systems.
 
----
-
 ## 🚀 Features
 
 ✅ **Fair Sampling**  
@@ -35,8 +33,6 @@ Gradio-based interface with:
 - Upload/download buttons
 - Input controls for easy experimentation
 
----
-
 ## 📁 File Structure
 
 ```
@@ -45,8 +41,6 @@ fair-batch-app/
 ├── requirements.txt     # Dependency file
 └── README.md            # This file
 ```
-
----
 
 ## 💻 Run Locally
 
@@ -71,8 +65,6 @@ python app.py
 
 Open your browser to `http://localhost:7860`
 
----
-
 ## 🌐 Deploy to Hugging Face Spaces
 
 1. Go to [https://huggingface.co/spaces](https://huggingface.co/spaces)
@@ -80,16 +72,12 @@ Open your browser to `http://localhost:7860`
 3. Choose **“From GitHub”** and link this repo
 4. The app will be deployed automatically
 
----
-
 ## 🔬 Example Use Cases
 
 - 🧠 Curriculum learning: ensure balanced exposure to all data points
 - 🧪 Fair participant sampling for experiments
 - 🎮 Fair rotation of players, maps, or assets in games
 - 🗂️ Random selection with usage balancing
-
----
 
 ## 📘 How It Works
 
@@ -102,19 +90,13 @@ The batching logic operates as follows:
 3. Update the appearance counts in real time
 4. Validate saved state compatibility with current settings
 
----
-
 ## 🛡️ License
 
 This project is open source under the [MIT License](LICENSE). Feel free to use, modify, or extend it!
 
----
-
 ## 🤝 Contributions
 
 Pull requests are welcome! Feel free to submit bug fixes, new features, or improvements to documentation.
-
----
 
 ## 📬 Contact
 
