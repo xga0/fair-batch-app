@@ -145,13 +145,13 @@ with gr.Blocks() as demo:
     save_counts_btn.click(
         fn=save_counts_only,
         inputs=[],
-        outputs=[gr.File(label="Download JSON", file_name="appearance_counts.json")]
+        outputs=[gr.File(label="Download JSON")]
     )
 
     save_full_btn.click(
         fn=save_full_progress,
         inputs=[],
-        outputs=[gr.File(label="Download JSON", file_name="full_progress.json")]
+        outputs=[gr.File(label="Download JSON")]
     )
 
     load_counts_file.upload(
