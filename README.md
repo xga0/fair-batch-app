@@ -1,3 +1,14 @@
+---
+title: Fair Batch App
+emoji: 🎯
+colorFrom: blue
+colorTo: green
+sdk: gradio
+sdk_version: "4.19.2"
+app_file: app.py
+pinned: false
+---
+
 # 🎲 Fair Batch Generator
 
 An interactive [Gradio](https://gradio.app/) web app for generating **fair batches of integers** from a configurable range. This app ensures balanced usage over time, useful for sampling, experimentation, and fairness-based systems.
@@ -69,7 +80,7 @@ Open your browser to `http://localhost:7860`
 
 1. Go to [https://huggingface.co/spaces](https://huggingface.co/spaces)
 2. Create a new **Gradio** Space
-3. Choose **“From GitHub”** and link this repo
+3. Choose **"From GitHub"** and link this repo
 4. The app will be deployed automatically
 
 ## 🔬 Example Use Cases
