@@ -124,8 +124,7 @@ with gr.Blocks() as demo:
             headers=["Item", "Count"],
             label="Appearance Count Table",
             height=400,  # Fixed height in pixels
-            wrap=True,   # Enable text wrapping
-            overflow_row_behaviour="scroll"  # Enable scrolling
+            wrap=True    # Enable text wrapping
         )
 
     with gr.Row():
