@@ -62,7 +62,8 @@ def clean_counts_to_current_range():
     return "✅ Out-of-range counts removed.", format_counts_for_table(appearance_counts)
 
 def save_counts_only():
-    return json.dumps(dict(appearance_counts), indent=2)
+    counts_json = json.dumps(dict(appearance_counts), indent=2)
+    return counts_json
 
 def load_counts_only(file):
     global appearance_counts
@@ -84,12 +85,13 @@ def load_counts_only(file):
     return warning, format_counts_for_table(appearance_counts)
 
 def save_full_progress():
-    return json.dumps({
+    full_data = {
         "appearance_counts": dict(appearance_counts),
         "N": session_config["N"],
         "k": session_config["k"],
         "start": session_config["start"]
-    }, indent=2)
+    }
+    return json.dumps(full_data, indent=2)
 
 def load_full_progress(file):
     global appearance_counts
@@ -116,11 +118,21 @@ with gr.Blocks() as demo:
         reset_btn = gr.Button("♻️ Reset Progress")
 
     batch_output = gr.Textbox(label="Generated Batch / Messages")
-    count_output = gr.Dataframe(headers=["Item", "Count"], label="Appearance Count Table")
+    
+    with gr.Row():
+        count_output = gr.Dataframe(
+            headers=["Item", "Count"],
+            label="Appearance Count Table",
+            height=400,  # Fixed height in pixels
+            wrap=True,   # Enable text wrapping
+            overflow_row_behaviour="scroll"  # Enable scrolling
+        )
 
     with gr.Row():
         save_counts_btn = gr.Button("💾 Download Appearance Counts (Quick Save)")
         save_full_btn = gr.Button("📦 Download Full Progress")
+        counts_download = gr.File(label="Download JSON", interactive=False)
+        full_download = gr.File(label="Download JSON", interactive=False)
     
     with gr.Row():
         load_counts_file = gr.File(label="📂 Upload Appearance Counts (Quick Load)", file_types=[".json"])
@@ -150,13 +162,13 @@ with gr.Blocks() as demo:
     save_counts_btn.click(
         fn=save_counts_only,
         inputs=[],
-        outputs=[gr.File(label="Download JSON")]
+        outputs=[counts_download]
     )
 
     save_full_btn.click(
         fn=save_full_progress,
         inputs=[],
-        outputs=[gr.File(label="Download JSON")]
+        outputs=[full_download]
     )
 
     load_counts_file.upload(
