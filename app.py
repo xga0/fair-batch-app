@@ -105,39 +105,48 @@ def load_full_progress(file):
     return "✅ Full progress restored.", format_counts_for_table(appearance_counts), contents["N"], contents["k"], contents["start"]
 
 # === Gradio UI ===
-with gr.Blocks() as demo:
+with gr.Blocks(theme=gr.themes.Soft()) as demo:
     gr.Markdown("# 🎲 Fair Batch Generator")
     
     with gr.Row():
-        n_input = gr.Number(value=10, label="Range Size (N)", precision=0)
-        k_input = gr.Number(value=3, label="Batch Size (k)", precision=0)
-        start_input = gr.Number(value=1, label="Range Start (inclusive)", precision=0)
+        with gr.Column(scale=1):
+            # Input Controls
+            with gr.Group():
+                gr.Markdown("### ⚙️ Configuration")
+                n_input = gr.Number(value=10, label="Range Size (N)", precision=0, minimum=1)
+                k_input = gr.Number(value=3, label="Batch Size (k)", precision=0, minimum=1)
+                start_input = gr.Number(value=1, label="Range Start (inclusive)", precision=0)
+                
+                with gr.Row():
+                    generate_btn = gr.Button("🔁 Generate Batch", size="lg")
+                    reset_btn = gr.Button("♻️ Reset", size="lg")
+                
+                clean_btn = gr.Button("🧹 Clean Counts to Match Current Range", size="lg")
 
-    with gr.Row():
-        generate_btn = gr.Button("🔁 Generate Batch")
-        reset_btn = gr.Button("♻️ Reset Progress")
+            # Save/Load Controls
+            with gr.Group():
+                gr.Markdown("### 💾 Save/Load")
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        save_counts_btn = gr.Button("📥 Quick Save\n(Counts Only)", size="sm")
+                        save_full_btn = gr.Button("📦 Full Save\n(All Data)", size="sm")
+                    with gr.Column(scale=1):
+                        load_counts_file = gr.File(label="Quick Load", file_types=[".json"])
+                        load_full_file = gr.File(label="Full Load", file_types=[".json"])
 
-    batch_output = gr.Textbox(label="Generated Batch / Messages")
-    
-    with gr.Row():
-        count_output = gr.Dataframe(
-            headers=["Item", "Count"],
-            label="Appearance Count Table",
-            height=400,  # Fixed height in pixels
-            wrap=True    # Enable text wrapping
-        )
-
-    with gr.Row():
-        save_counts_btn = gr.Button("💾 Download Appearance Counts (Quick Save)")
-        save_full_btn = gr.Button("📦 Download Full Progress")
-        counts_download = gr.File(label="Download JSON", interactive=False)
-        full_download = gr.File(label="Download JSON", interactive=False)
-    
-    with gr.Row():
-        load_counts_file = gr.File(label="📂 Upload Appearance Counts (Quick Load)", file_types=[".json"])
-        load_full_file = gr.File(label="📦 Upload Full Progress", file_types=[".json"])
-
-    clean_btn = gr.Button("🧹 Clean Counts to Match Current Range")
+        with gr.Column(scale=2):
+            # Output Area
+            with gr.Group():
+                gr.Markdown("### 🎯 Results")
+                batch_output = gr.Textbox(label="Generated Batch / Messages", show_label=False)
+                
+                gr.Markdown("### 📊 Appearance Counts")
+                count_output = gr.Dataframe(
+                    headers=["Item", "Count"],
+                    label="Count Table",
+                    height=500,
+                    wrap=True
+                )
 
     # Hook up buttons
     generate_btn.click(
@@ -158,16 +167,37 @@ with gr.Blocks() as demo:
         outputs=[batch_output, count_output]
     )
 
+    # Save functions
+    def create_json_file(data, filename):
+        json_str = json.dumps(data, indent=2)
+        return {
+            "name": filename,
+            "data": json_str.encode('utf-8')
+        }
+
+    def save_counts():
+        data = dict(appearance_counts)
+        return create_json_file(data, "appearance_counts.json")
+
+    def save_full():
+        data = {
+            "appearance_counts": dict(appearance_counts),
+            "N": session_config["N"],
+            "k": session_config["k"],
+            "start": session_config["start"]
+        }
+        return create_json_file(data, "full_progress.json")
+
     save_counts_btn.click(
-        fn=save_counts_only,
+        fn=save_counts,
         inputs=[],
-        outputs=[counts_download]
+        outputs=gr.File()
     )
 
     save_full_btn.click(
-        fn=save_full_progress,
+        fn=save_full,
         inputs=[],
-        outputs=[full_download]
+        outputs=gr.File()
     )
 
     load_counts_file.upload(
