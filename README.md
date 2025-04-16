@@ -4,48 +4,125 @@ emoji: 🎯
 colorFrom: blue
 colorTo: green
 sdk: gradio
-sdk_version: "4.44.1"
+sdk_version: "5.23.2"
 app_file: app.py
 pinned: false
 ---
 
 # 🎲 Fair Batch Generator
 
-An interactive [Gradio](https://gradio.app/) web app for generating **fair batches of integers** from a configurable range. This app ensures balanced usage over time, useful for sampling, experimentation, and fairness-based systems.
+> Try it now: [**Live Demo on Hugging Face**](https://huggingface.co/spaces/xga0/fair-batch-app)
+
+A Gradio web application that generates fair batches from a range of numbers, ensuring each number appears a roughly equal number of times across multiple batch generations.
+
+## 📋 Overview
+
+### What is Fair Sampling & Why It Matters
+
+Traditional random sampling tends to create imbalances — some elements appear frequently while others rarely show up, especially in small batches. **Fair sampling** solves this problem by:
+
+1. **Tracking appearances**: Keeping count of how often each number has been chosen
+2. **Prioritizing under-represented elements**: Preferentially selecting numbers that have appeared less frequently
+3. **Balancing representation**: Ensuring all numbers have roughly equal representation over time
+
+This matters in many real-world scenarios:
+- **Machine Learning**: Preventing bias in training data selection
+- **User Testing**: Ensuring all test cases receive equal attention
+- **Resource Allocation**: Fairly distributing limited resources across multiple targets
+
+### Simple Example
+
+Imagine you have numbers 1-5 and want to generate batches of size 2:
+
+```
+Initial state: Each number has appeared 0 times
+[1, 2, 3, 4, 5] → counts: [0, 0, 0, 0, 0]
+
+Batch 1: [1, 2]
+[1, 2, 3, 4, 5] → counts: [1, 1, 0, 0, 0]
+
+Batch 2: [3, 4] (chosen because they have the lowest counts)
+[1, 2, 3, 4, 5] → counts: [1, 1, 1, 1, 0]
+
+Batch 3: [5, 1] (5 has lowest count; 1 randomly chosen from equal counts)
+[1, 2, 3, 4, 5] → counts: [2, 1, 1, 1, 1]
+
+Batch 4: [2, 3] (2, 3, 4, 5 all tied for lowest count)
+[1, 2, 3, 4, 5] → counts: [2, 2, 2, 1, 1]
+```
+
+Over time, the appearance counts will remain balanced, unlike pure random selection.
 
 ## 🚀 Features
 
-✅ **Fair Sampling**  
-Generates batches of `k` integers from a specified range such that all numbers appear with roughly equal frequency over time.
+### Core Functionality
+- **Fair Batch Generation**: Produces batches that prioritize numbers with the lowest appearance count
+- **Customizable Parameters**: Configure range size (N), batch size (k), and starting value
+- **Appearance Tracking**: Maintains counts of how often each number has been selected
+- **Persistent State**: Save and load your progress using the built-in tools
 
-✅ **Configurable Parameters**  
-You control:
-- `N`: Range size (number of elements)
-- `k`: Batch size
-- `start`: Starting value of the range (inclusive)
+### Technical Details
+- **Two Save Options**:
+  - **Quick Save**: Exports only the appearance count data
+  - **Full Save**: Exports counts plus your current settings (N, k, start)
+- **Data Validation**: Warns when loaded data doesn't match current range parameters
+- **Maintenance Tools**: Clean out-of-range entries from appearance counts after parameter changes
+- **Visual Analysis**: View and sort appearance counts in an interactive data table
 
-✅ **Live Session State**  
-Tracks how many times each number has been selected via an internal `appearance_counts` dictionary.
+### Example Use Cases
+- 🧠 **Curriculum learning**: Ensure each training example is seen roughly the same number of times
+- 🧪 **Experimental design**: Fairly distribute treatments or conditions among test subjects
+- 🎮 **Game development**: Ensure players experience all levels/scenarios with balanced frequency
+- 🎯 **A/B testing**: Distribute users evenly across different test variations
+- 📊 **Survey sampling**: Select respondents from different demographics in a balanced way
+- 🎲 **Board games**: Implement fair card/tile drawing systems that prevent unlucky streaks
 
-✅ **Two Types of Save/Load**  
-- **Quick Save/Load**: Saves only the appearance count data  
-- **Full Save/Load**: Saves counts **plus** your current input settings (`N`, `k`, `start`)
+## 🔍 How It Works
 
-✅ **Mismatch Warnings**  
-If you change `N`, `k`, or `start` after loading a save file, the app will warn you if the loaded data is no longer valid for the new range.
+### Core Algorithm
+1. Find the minimum appearance count across all numbers in the range
+2. Identify all numbers that have this minimum count
+3. Randomly shuffle this subset of numbers
+4. Fill the batch with these minimally-represented numbers
+5. If more numbers are needed, randomly select from remaining numbers
+6. Update the appearance counts for the selected batch
 
-✅ **Clean Counts Feature**  
-🧹 A one-click button to clean out-of-range entries in `appearance_counts` after modifying input parameters.
+This approach ensures that, over time, all numbers in the range appear approximately the same number of times, creating a balanced distribution that pure randomization cannot guarantee.
 
-✅ **Interactive UI**  
-Gradio-based interface with:
-- Batch generator
-- Real-time data table
-- Upload/download buttons
-- Input controls for easy experimentation
+## 🖥️ Usage Guide
 
-## 📁 File Structure
+### Getting Started
+1. Set your desired range size (N), batch size (k), and starting value
+2. Click "Generate Batch" to create a new batch of numbers
+3. View the batch results and updated appearance counts
+4. Save your progress at any time using the save options
+5. Load previously saved progress to continue where you left off
 
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/xga0/fair-batch-app.git
+cd fair-batch-app
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+python app.py
+```
+
+Open your browser to `http://localhost:7860`
+
+## 📦 Project Information
+
+### Requirements
+- Python 3.7+
+- Gradio 5.23.2
+- Numpy
+- Pandas
+
+### File Structure
 ```
 fair-batch-app/
 ├── app.py               # Main Gradio app
@@ -53,62 +130,14 @@ fair-batch-app/
 └── README.md            # This file
 ```
 
-## 💻 Run Locally
+### License
+This project is open source under the [MIT License](LICENSE).
 
-1. Clone this repo:
-
-```bash
-git clone https://github.com/YOUR_USERNAME/fair-batch-app.git
-cd fair-batch-app
-```
-
-2. Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-3. Launch the app:
-
-```bash
-python app.py
-```
-
-Open your browser to `http://localhost:7860`
-
-## 🌐 Deploy to Hugging Face Spaces
-
-1. Go to [https://huggingface.co/spaces](https://huggingface.co/spaces)
-2. Create a new **Gradio** Space
-3. Choose **"From GitHub"** and link this repo
-4. The app will be deployed automatically
-
-## 🔬 Example Use Cases
-
-- 🧠 Curriculum learning: ensure balanced exposure to all data points
-- 🧪 Fair participant sampling for experiments
-- 🎮 Fair rotation of players, maps, or assets in games
-- 🗂️ Random selection with usage balancing
-
-## 📘 How It Works
-
-The batching logic operates as follows:
-
-1. Track how often each number has been selected (`appearance_counts`)
-2. In each batch:
-   - Prefer numbers with the fewest appearances
-   - Fill remaining slots randomly without repeating numbers
-3. Update the appearance counts in real time
-4. Validate saved state compatibility with current settings
-
-## 🛡️ License
-
-This project is open source under the [MIT License](LICENSE). Feel free to use, modify, or extend it!
-
-## 🤝 Contributions
-
+### Contributions
 Pull requests are welcome! Feel free to submit bug fixes, new features, or improvements to documentation.
 
-## 📬 Contact
+### Credit
+Created with ❤️ using [Hugging Face Spaces](https://huggingface.co/spaces/xga0/fair-batch-app) and [Gradio](https://gradio.app/)
 
+### Contact
 Questions or ideas? File an issue or reach out via GitHub.
