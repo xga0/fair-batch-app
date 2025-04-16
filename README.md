@@ -11,6 +11,10 @@ pinned: false
 
 # 🎲 Fair Batch Generator
 
+[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Gradio Demo](https://img.shields.io/badge/gradio-demo-orange.svg)](https://huggingface.co/spaces/xga0/fair-batch-app)
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 > Try it now: [**Live Demo on Hugging Face**](https://huggingface.co/spaces/xga0/fair-batch-app)
 
 A Gradio web application that generates fair batches from a range of numbers, ensuring each number appears a roughly equal number of times across multiple batch generations.
