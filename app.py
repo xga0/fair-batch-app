@@ -134,10 +134,68 @@ def load_from_file(file_obj):
     global appearance_counts
     
     if file_obj is None:
-        return "❌ No file selected", format_counts_for_table(appearance_counts)
+        return "❌ No file selected", format_counts_for_table(appearance_counts), None, None, None
     
     try:
-        file_content = file_obj.decode('utf-8')
+        # Debug information
+        file_info = f"File object type: {type(file_obj)}"
+        if isinstance(file_obj, dict):
+            file_info += f" | Keys: {list(file_obj.keys())}"
+        
+        # Handle different file object formats from various Gradio versions
+        file_content = None
+        
+        # Binary data from gr.File(type="binary")
+        if isinstance(file_obj, bytes):
+            file_content = file_obj.decode('utf-8')
+            file_info += " | Decoded from bytes"
+        
+        # Format 1: Gradio dict format {'name': 'filename.json', 'path': 'path/to/temp/file'}
+        elif isinstance(file_obj, dict) and 'path' in file_obj:
+            file_path = file_obj['path']
+            with open(file_path, 'r') as f:
+                file_content = f.read()
+            file_info += f" | Reading from path: {file_path}"
+        
+        # Format 2: Direct file path string
+        elif isinstance(file_obj, str):
+            try:
+                with open(file_obj, 'r') as f:
+                    file_content = f.read()
+                file_info += f" | Reading from string path: {file_obj}"
+            except:
+                # It might be the JSON content directly
+                file_content = file_obj
+                file_info += " | Using string as direct content"
+        
+        # Format 3: File-like object with decode method
+        elif hasattr(file_obj, 'decode'):
+            file_content = file_obj.decode('utf-8')
+            file_info += " | Using decode() method"
+            
+        # Format 4: Single file in a list (some Gradio versions return this)
+        elif isinstance(file_obj, list) and len(file_obj) > 0:
+            first_file = file_obj[0]
+            if isinstance(first_file, dict) and 'path' in first_file:
+                file_path = first_file['path']
+                with open(file_path, 'r') as f:
+                    file_content = f.read()
+                file_info += f" | Reading from list[0].path: {file_path}"
+            elif isinstance(first_file, str):
+                with open(first_file, 'r') as f:
+                    file_content = f.read()
+                file_info += f" | Reading from list[0] string: {first_file}"
+            elif isinstance(first_file, bytes):
+                file_content = first_file.decode('utf-8')
+                file_info += " | Decoded from list[0] bytes"
+        
+        # If we couldn't get file content from any method
+        if file_content is None:
+            return f"❌ Unsupported file format. Debug info: {file_info}", format_counts_for_table(appearance_counts), None, None, None
+        
+        # Log what we're working with    
+        print(f"DEBUG - File loading: {file_info}")
+            
         data = json.loads(file_content)
         
         # Check if it's a full config file or just counts
@@ -155,6 +213,9 @@ def load_from_file(file_obj):
             appearance_counts = defaultdict(int, {int(k): v for k, v in data.items()})
             return "✅ Appearance counts loaded!", format_counts_for_table(appearance_counts), None, None, None
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"DEBUG - Error loading file: {str(e)}\n{error_details}")
         return f"❌ Error loading file: {str(e)}", format_counts_for_table(appearance_counts), None, None, None
 
 def update_params(status, counts, n=None, k=None, start=None):
@@ -197,31 +258,92 @@ with gr.Blocks(theme=gr.themes.Soft(
     }
     
     .header-box {
-        background: linear-gradient(to right, var(--background-fill-primary), var(--background-fill-secondary));
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 16px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        background: linear-gradient(to right, #6366f1, #3b82f6);
+        padding: 18px 22px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        transition: background 0.3s ease;
+    }
+    
+    .header-box:hover {
+        background: linear-gradient(to right, #4f46e5, #2563eb);
     }
     
     .header-box h3 {
         margin: 0;
-        font-weight: 600;
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: white;
+        display: flex;
+        align-items: center;
     }
     
-    .action-button {
-        transition: transform 0.2s;
+    .header-box h3::before {
+        content: "⚙️ ";
+        margin-right: 8px;
     }
     
-    .action-button:hover {
-        transform: translateY(-2px);
+    .result-header-box h3::before {
+        content: "🎯 ";
+        margin-right: 8px;
+    }
+    
+    .result-header-box {
+        background: linear-gradient(to right, #3b82f6, #4f46e5);
+        padding: 16px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
     }
     
     .result-area {
         background-color: var(--background-fill-secondary);
-        border-radius: 8px;
-        padding: 16px;
-        margin-bottom: 16px;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    
+    .action-button {
+        transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .action-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        background-color: #4f46e5;
+        color: white;
+    }
+    
+    .tip-text {
+        font-style: italic;
+        color: var(--body-text-color-subdued);
+        font-size: 0.9rem;
+        margin-top: 8px;
+    }
+    
+    .footer {
+        text-align: center;
+        margin-top: 2.5rem;
+        padding: 1.5rem;
+        border-top: 1px solid var(--border-color-primary);
+        font-size: 0.95rem;
+        color: var(--body-text-color-subdued);
+    }
+    
+    .footer a {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+    
+    .footer a:hover {
+        text-decoration: underline;
     }
     </style>
     """)
@@ -265,8 +387,14 @@ with gr.Blocks(theme=gr.themes.Soft(
                     gr.Markdown("#### Load Data")
                     with gr.Tabs(selected=0):
                         with gr.Tab("Upload File"):
-                            upload_file = gr.File(label="Upload JSON File")
+                            upload_file = gr.File(
+                                label="Upload JSON File", 
+                                file_types=[".json"],
+                                type="binary"  # Changed from 'file' to 'binary'
+                            )
                             upload_btn = gr.Button("Load File", variant="secondary", elem_classes=["action-button"])
+                            gr.Markdown("*If you encounter file upload issues, try using the 'Paste JSON' tab instead.*", 
+                                        elem_classes=["tip-text"])
                         
                         with gr.Tab("Paste JSON"):
                             counts_json_input = gr.Textbox(label="Paste Counts JSON", lines=4)
@@ -351,13 +479,9 @@ with gr.Blocks(theme=gr.themes.Soft(
 
     # Add footer
     gr.Markdown("""
-    <div style="text-align: center; margin-top: 2rem; padding: 1rem; border-top: 1px solid var(--border-color-primary)">
-        <p style="color: var(--body-text-color-subdued); font-size: 0.9rem;">
-            🎲 Fair Batch Generator | <a href="https://github.com/xga0/fair-batch-app" target="_blank">GitHub</a> | <a href="https://huggingface.co/spaces/xga0/fair-batch-app" target="_blank">Hugging Face Spaces</a>
-        </p>
-        <p style="color: var(--body-text-color-subdued); font-size: 0.8rem;">
-            Created with Gradio 5.23.2 | MIT License
-        </p>
+    <div class="footer">
+        <p>🎲 Fair Batch Generator | <a href="https://github.com/xga0/fair-batch-app" target="_blank">GitHub</a> | <a href="https://huggingface.co/spaces/xga0/fair-batch-app" target="_blank">Hugging Face Spaces</a></p>
+        <p>Created with Gradio 5.23.2 | MIT License</p>
     </div>
     """)
 

@@ -1,6 +1,6 @@
 ---
 title: Fair Batch App
-emoji: 🎯
+emoji: 🎲
 colorFrom: blue
 colorTo: green
 sdk: gradio
